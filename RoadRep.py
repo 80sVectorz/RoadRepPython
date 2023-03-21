@@ -40,9 +40,6 @@ class Road:
                 self.lanes.append(Lane(RoadShape(RoadShapeType.LINEAR)))
                 self.lanes[i].shape.SetLinear(shape.start.copy(),shape.end.copy())
                 self.lanes[i].shape.LaneOffset(i)
-        for lane in self.lanes:
-            print(lane.shape.start)
-
 
 class RoadNet:
     def __init__(self,roads: List[Road]) -> None:

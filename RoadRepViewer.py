@@ -3,11 +3,18 @@
 
 import RoadRep
 import sys
+import argparse
 import numpy as np
-from Utils import Vector2
- 
+from Utils import Vector2 
+from Utils import Log,OutputLog
 import pygame
 from pygame.locals import *
+
+# Argument handling:
+parser = argparse.ArgumentParser()
+parser.add_argument("-v","--verbose",dest="verbose",action="store_true",help="get debug info.")
+
+args = parser.parse_args()
 
 # Function definitions:
 def WorldToScreen(p: np.ndarray) -> np.ndarray:
@@ -30,12 +37,15 @@ screen = pygame.display.set_mode((width, height))
 
 
 # Test road network:
+Log("Creating test network.")
 shape = RoadRep.RoadShape(RoadRep.RoadShapeType.LINEAR)
 shape.SetLinear(Vector2(0,0),Vector2(50,40))
 roads = [RoadRep.Road(4,shape)]
 rn = RoadRep.RoadNet(roads)
+Log("Finished creating test network.")
 
 # runtime variables:
+
 zoom = 500
 frustum = Vector2(zoom,zoom/screenRatio)
 camPos = Vector2(0.0,0.0)
@@ -44,6 +54,8 @@ panStartPos = Vector2(0.0,0.0)
 panStartCamPos = camPos
 
 # program loop:
+Log("Starting main program loop.")
+
 while True:
   screen.fill((0, 0, 0))
 
@@ -67,7 +79,6 @@ while True:
   mouseButton = pygame.mouse.get_pressed(3)[0]
   if mouseButton and not panning:
     panStartCamPos = camPos
-    print("camPos:",camPos)
     panStartPos = ScreenToWorld(np.array(pygame.mouse.get_pos()),panStartCamPos)
     panning = True
   elif mouseButton and panning:
@@ -84,6 +95,7 @@ while True:
                          (0,255,0),
                          WorldToScreen(lane.shape.start+camPos),
                          WorldToScreen(lane.shape.end+camPos))
-  
+  if args.verbose:
+    OutputLog()  
   pygame.display.flip()
   fpsClock.tick(fps)
