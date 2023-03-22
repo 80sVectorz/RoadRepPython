@@ -5,8 +5,8 @@ import RoadRep
 import sys
 import argparse
 import numpy as np
-from Utils import Vector2 
-from Utils import Log,OutputLog
+from Utils import Vector2
+from Utils import log,output_log
 import pygame
 from pygame.locals import *
 
@@ -17,44 +17,48 @@ parser.add_argument("-v","--verbose",dest="verbose",action="store_true",help="ge
 args = parser.parse_args()
 
 # Function definitions:
-def WorldToScreen(p: np.ndarray) -> np.ndarray:
+def WorldToScreen(p: Vector2) -> Vector2:
   return (p*(Vector2(width,height)/frustum)*Vector2(1,-1)) + Vector2(width/2,height/2)
 
-def ScreenToWorld(p: np.ndarray,camPos: np.ndarray) -> np.ndarray:
+def ScreenToWorld(p: Vector2,camPos: Vector2) -> Vector2:
   return (p - Vector2(width/2,height/2))/((Vector2(width,height)/frustum)*Vector2(1,-1))+camPos
 
-def UpdateFrustum(zoom: int) -> np.ndarray:
-  return Vector2(zoom,zoom/screenRatio)
+def UpdateFrustum(zoom: int) -> Vector2:
+  return Vector2(zoom,zoom/screen_ratio)
 
 pygame.init()
 
 fps = 60
-fpsClock = pygame.time.Clock()
+fps_clock = pygame.time.Clock()
  
 width, height = 640, 480
-screenRatio = width/height
+screen_ratio = width/height
 screen = pygame.display.set_mode((width, height))
 
 
 # Test road network:
-Log("Creating test network.")
-shape = RoadRep.RoadShape(RoadRep.RoadShapeType.LINEAR)
-shape.SetLinear(Vector2(0,0),Vector2(50,40))
-roads = [RoadRep.Road(4,shape)]
+log("Creating test network.")
+
+roads = []
+shape = RoadRep.LinearShape(Vector2(0,0),Vector2(50,40))
+roads.append(RoadRep.Road(4,RoadRep.LaneShapeType.LINEAR,shape))
+shape = RoadRep.LinearShape(Vector2(10,30),Vector2(50,40))
+roads.append(RoadRep.Road(4,RoadRep.LaneShapeType.LINEAR,shape))
+
 rn = RoadRep.RoadNet(roads)
-Log("Finished creating test network.")
+rn.bake()
+log("Finished creating test network.")
 
 # runtime variables:
-
 zoom = 500
-frustum = Vector2(zoom,zoom/screenRatio)
-camPos = Vector2(0.0,0.0)
+frustum = Vector2(zoom,zoom/screen_ratio)
+cam_pos = Vector2(0.0,0.0)
 panning = False
-panStartPos = Vector2(0.0,0.0)
-panStartCamPos = camPos
+pan_start_pos = Vector2(0.0,0.0)
+pan_start_cam_pos = cam_pos
 
 # program loop:
-Log("Starting main program loop.")
+log("Starting main program loop.")
 
 while True:
   screen.fill((0, 0, 0))
@@ -66,36 +70,35 @@ while True:
       sys.exit() 
     # Zooming:
     if event.type == pygame.MOUSEWHEEL:
-      scrollChange = event.y
-      mousePos = pygame.mouse.get_pos()
-      mouseBeforePos = ScreenToWorld(np.array(mousePos),camPos)
-      zoom-=scrollChange*10
+      scroll_change = event.y
+      mouse_pos = pygame.mouse.get_pos()
+      mouse_before_pos = ScreenToWorld(np.array(mouse_pos),cam_pos)
+      zoom-=scroll_change*10
       zoom=max(zoom,10)
       frustum = UpdateFrustum(zoom)
-      mouseAfterPos = ScreenToWorld(mousePos,camPos)
-      camPos-=mouseBeforePos-mouseAfterPos
+      mouse_after_pos = ScreenToWorld(np.array(mouse_pos),cam_pos)
+      cam_pos-=mouse_before_pos-mouse_after_pos
 
   # Panning:
-  mouseButton = pygame.mouse.get_pressed(3)[0]
-  if mouseButton and not panning:
-    panStartCamPos = camPos
-    panStartPos = ScreenToWorld(np.array(pygame.mouse.get_pos()),panStartCamPos)
+  mouse_button = pygame.mouse.get_pressed(3)[0]
+  if mouse_button and not panning:
+    pan_start_cam_pos = cam_pos
+    pan_start_pos = ScreenToWorld(np.array(pygame.mouse.get_pos()),pan_start_cam_pos)
     panning = True
-  elif mouseButton and panning:
-    camPos=panStartCamPos+(ScreenToWorld(np.array(pygame.mouse.get_pos()),panStartCamPos)-panStartPos)
-  elif not mouseButton and panning:
+  elif mouse_button and panning:
+    cam_pos=pan_start_cam_pos+(ScreenToWorld(np.array(pygame.mouse.get_pos()),pan_start_cam_pos)-pan_start_pos)
+  elif not mouse_button and panning:
     panning = False
   
   
   # Draw:
-  for road in rn.roads:
-    for lane in road.lanes:
-      if lane.shape.shapeType == RoadRep.RoadShapeType.LINEAR:
-        pygame.draw.line(screen,
-                         (0,255,0),
-                         WorldToScreen(lane.shape.start+camPos),
-                         WorldToScreen(lane.shape.end+camPos))
+  for lane in rn.baked_lanes:
+        if lane.shapeType == RoadRep.LaneShapeType.LINEAR:
+          pygame.draw.line(screen,
+                          (0,255,0),
+                          WorldToScreen(lane.start+cam_pos).baked(),
+                          WorldToScreen(lane.end+cam_pos).baked())
   if args.verbose:
-    OutputLog()  
+    output_log()  
   pygame.display.flip()
-  fpsClock.tick(fps)
+  fps_clock.tick(fps)
