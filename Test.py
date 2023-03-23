@@ -5,5 +5,7 @@ colored_traceback.add_hook()
 
 import RoadRep
 from RoadRep import LaneShapeType
+from Utils import Vector2
 
-#Nothing here for now
+lane = RoadRep.Lane(LaneShapeType.LINEAR)
+lane.set_linear(Vector2(0,0),Vector2(0,10))

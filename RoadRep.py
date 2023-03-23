@@ -36,11 +36,11 @@ class Lane:
 
     def set_linear(self, start: Vector2, end: Vector2) -> None:
         if self.shapeType != LaneShapeType.LINEAR:
-            raise Exception(f"Set LINEAR requires a road shape type of LINEAR | type found: {self.shapeType}")
+            raise Exception(f"Set linear requires a road shape type of LINEAR | type found: {self.shapeType}")
         self.start = copy(start)
         self.end = copy(end)
  
-    def set_linear(self, shape: LinearShape) -> None:
+    def set_linear_from_shape(self,shape: LinearShape) -> None:
         self.set_linear(shape.start,shape.end) #This is efficient but it feels a little cursed
 
     def lane_offset(self,lane: int) -> None:
@@ -75,7 +75,6 @@ class Road(Lane):
             if self.shapeType == LaneShapeType.LINEAR:
                 lane = Lane(LaneShapeType.LINEAR,self)
                 lane.lane_offset(i)
-                lane.bake()
                 self.lanes.append(lane)
 
     def bake(self) -> None:
