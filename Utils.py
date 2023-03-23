@@ -1,4 +1,4 @@
-#Utils.py Utiliy functions
+""" Utils.py Utility functions. """
 from __future__ import annotations
 import typing
 from typing import Union
@@ -7,7 +7,7 @@ from datetime import datetime
 
 
 class Vector2:
-    """Vector2 class"""
+    """Vector2 class for better readability and ease of use."""
     x: float
     y: float
     
@@ -16,7 +16,8 @@ class Vector2:
         self.y = y
 
     @classmethod
-    def from_array(cls, array: Union[np.ndarray,tuple[float,float]]) -> Vector2:
+    def from_array(cls, array: Union[np.ndarray,tuple[float,float],list[float]]) -> Vector2:
+        """Creates a Vector2 from one of: np.ndarray, tuple, list."""
         return cls(array[0],array[1])
         
     def __array__(self) -> np.ndarray:
@@ -117,6 +118,7 @@ class Vector2:
         return self
     
     def baked(self) -> tuple[float, float]:
+        """Returns a tuple like this: (x,y)."""
         return (self.x, self.y)
     
 
@@ -125,7 +127,7 @@ class Vector2:
 log_list = []
 
 def log(*args: tuple) -> None:
-    """Log function to allow logging across different modules"""
+    """Adds the given message to the log with an appended timestamp."""
     global log_list
 
     t = formatted_time = datetime.now().strftime("%H:%M:%S:%f")[:-3]
@@ -134,9 +136,9 @@ def log(*args: tuple) -> None:
     log_list.append(f"| {t} | {txt}")
 
 def output_log() -> None:
-    """Function to output latest log messages"""
+    """Outputs latest log messages and clears them from the log_list."""
 
-    global log
-    for txt in log:
+    global log_list
+    for txt in log_list:
         print(txt)
     log.clear()

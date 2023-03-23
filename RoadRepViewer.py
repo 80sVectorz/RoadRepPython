@@ -1,5 +1,7 @@
-# RoadRepViewer.py A simple view application used for debugging.
-# made using this template: https://gist.github.com/MatthewJA/7544830
+"""
+RoadRepViewer.py A simple view application used for debugging.
+Made using this template: https://gist.github.com/MatthewJA/7544830
+"""
 
 import RoadRep
 import sys
@@ -12,15 +14,20 @@ from pygame.locals import *
 
 # Function definitions:
 def WorldToScreen(p: Vector2, frustum: Vector2, width: int, height: int) -> Vector2:
+  """Returns the converted world space P to screen space."""
   return (p*(Vector2(width,height)/frustum)*Vector2(1,-1)) + Vector2(width/2,height/2)
 
 def ScreenToWorld(p: Vector2,camPos: Vector2, frustum: Vector2, width: int, height: int) -> Vector2:
+  """Returns the converted screen space P to world space."""
   return (p - Vector2(width/2,height/2))/((Vector2(width,height)/frustum)*Vector2(1,-1))+camPos
 
 def UpdateFrustum(zoom: int, screen_ratio: float) -> Vector2:
+  """Returns the given frustum with the zoom applied."""
   return Vector2(zoom,zoom/screen_ratio)
 
 def main():
+  """Runs the program loop for RoadRepViewer.py."""
+
   # Argument handling:
   parser = argparse.ArgumentParser()
   parser.add_argument("-v","--verbose",dest="verbose",action="store_true",help="get debug info.")
@@ -50,7 +57,7 @@ def main():
   rn.bake()
   log("Finished creating test network.")
 
-  # runtime variables:
+  # Runtime variables:
   zoom = 500
   frustum = Vector2(zoom,zoom/screen_ratio)
   cam_pos = Vector2(0.0,0.0)
@@ -58,7 +65,7 @@ def main():
   pan_start_pos = Vector2(0.0,0.0)
   pan_start_cam_pos = cam_pos
 
-  # program loop:
+  # Program loop:
   log("Starting main program loop.")
 
   while True:
